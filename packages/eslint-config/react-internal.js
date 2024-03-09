@@ -1,4 +1,5 @@
 const { resolve } = require("node:path");
+const vercelPrettierSettings = require("@vercel/style-guide/prettier")
 
 const project = resolve(process.cwd(), "tsconfig.json");
 
@@ -16,15 +17,15 @@ const project = resolve(process.cwd(), "tsconfig.json");
 module.exports = {
   extends: [
     "eslint:recommended",
-    "prettier",
     require.resolve("@vercel/style-guide/eslint/typescript"),
     require.resolve("@vercel/style-guide/eslint/browser"),
     require.resolve("@vercel/style-guide/eslint/react"),
     require.resolve("@vercel/style-guide/eslint/jest"),
     require.resolve("@vercel/style-guide/eslint/jest-react"),
     "eslint-config-turbo",
+    "plugin:prettier/recommended",
   ],
-  plugins: ["only-warn"],
+  plugins: ["only-warn", "prettier"],
   globals: {
     React: true,
     JSX: true,
@@ -54,5 +55,6 @@ module.exports = {
       "namedComponents": "arrow-function",
       "unnamedComponents": "arrow-function",
      }],
+     "prettier/prettier": ["warn", vercelPrettierSettings]
   }
 };
