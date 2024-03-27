@@ -7,22 +7,17 @@ const project = resolve(process.cwd(), "tsconfig.json");
 module.exports = {
   extends: [
     "eslint:recommended",
+    "prettier",
     require.resolve("@vercel/style-guide/eslint/typescript"),
-    require.resolve("@vercel/style-guide/eslint/browser"),
-    require.resolve("@vercel/style-guide/eslint/react"),
+    require.resolve("@vercel/style-guide/eslint/node"),
     require.resolve("@vercel/style-guide/eslint/jest"),
-    require.resolve("@vercel/style-guide/eslint/jest-react"),
     "eslint-config-turbo",
     "plugin:prettier/recommended",
   ],
-  plugins: ["only-warn", "prettier"],
-  globals: {
-    React: true,
-    JSX: true,
-  },
   env: {
-    browser: true,
+    node: true,
   },
+  plugins: ["only-warn", "prettier"],
   settings: {
     "import/resolver": {
       typescript: {
@@ -31,18 +26,12 @@ module.exports = {
     },
   },
   ignorePatterns: [
+    // Ignore dotfiles
     ".*.js",
     "node_modules/",
-    "dist/",
   ],
-  overrides: [
-    { files: ["*.js?(x)", "*.ts?(x)"] },
-  ],
+  overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
   rules: {
-    "react/function-component-definition": ["warn", { 
-      "namedComponents": "arrow-function",
-      "unnamedComponents": "arrow-function",
-     }],
-     "prettier/prettier": ["warn", prettierConfig]
+     "prettier/prettier": ["warn", prettierConfig],
   }
 };

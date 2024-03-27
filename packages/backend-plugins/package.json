@@ -1,0 +1,25 @@
+{
+  "name": "@repo/backend-plugins",
+  "version": "1.0.50",
+  "exports": {
+    "./plugins": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@elysiajs/eden": "^x1.0.7",
+    "@prisma/client": "^5.11.0",
+    "elysia": "latest",
+    "pino": "^8.19.0",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "bun-types": "latest",
+    "eslint": "^8.56.0",
+    "@types/eslint": "^8.56.1"
+  },
+  "module": "src/index.js"
+}
