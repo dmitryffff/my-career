@@ -1,5 +1,5 @@
 const { resolve } = require("node:path");
-const vercelPrettierSettings = require("@vercel/style-guide/prettier")
+const prettierConfig = require("./prettier-config")
 
 const project = resolve(process.cwd(), "tsconfig.json");
 
@@ -43,6 +43,6 @@ module.exports = {
       "namedComponents": "arrow-function",
       "unnamedComponents": "arrow-function",
      }],
-     "prettier/prettier": ["warn", vercelPrettierSettings]
+     "prettier/prettier": ["warn", prettierConfig]
   }
 };
