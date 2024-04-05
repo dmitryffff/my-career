@@ -10,13 +10,13 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@repo/ui": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "@tauri-apps/api": ">=2.0.0-beta.0",
     "@tauri-apps/plugin-shell": ">=2.0.0-beta.0"
   },
   "devDependencies": {
+    "@repo/ui": "*",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/react": "^18.2.15",
@@ -26,7 +26,7 @@
     "vite": "^5.0.0",
     "@tauri-apps/cli": ">=2.0.0-beta.0",
     "internal-ip": "^7.0.0",
-    "eslint": "^8.56.0",
-    "@types/eslint": "^8.56.1"
+    "eslint": "^9.0.0",
+    "@types/eslint": "^8.56.7"
   }
 }

@@ -6,15 +6,17 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "@repo/backend-plugins": "*",
     "@prisma/client": "^5.11.0",
     "elysia": "latest",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/eslint": "^8.56.1",
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@repo/backend-plugins": "*",
+    "@types/eslint": "^8.56.7",
     "bun-types": "latest",
-    "eslint": "^8.56.0",
+    "eslint": "^9.0.0",
     "prisma": "^5.11.0"
   },
   "module": "src/index.js"
