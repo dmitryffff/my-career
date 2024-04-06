@@ -1,10 +1,18 @@
 #!/usr/bin/env bun
-type Args = {
-  scriptRunner: string;
-  template: string[];
-  projectTypeDir: string;
-  name: string;
-};
+type StringMap = {
+  [key: string]: string,
+}
+
+type PackageJson = {
+  name: string,
+  devDependencies: StringMap,
+  exports?: StringMap,
+  [key: string]: unknown
+}
+const settingsDevDeps = {
+  '@repo/eslint-config': '*',
+  '@repo/typescript-config': '*',
+}
 
 const BUN_CREATE_SCRIPT = 'create'
 const REQUIRED_ARGS = {
@@ -15,6 +23,14 @@ const REQUIRED_ARGS = {
 const TYPE_VALUES = ['app', 'package', 'a', 'p'] as const
 type TypeValues = typeof TYPE_VALUES[number]
 const DEFAULT_INIT_TEMPLATE = ["init", "-y"]
+
+type Args = {
+  scriptRunner: string;
+  template: string[];
+  typeValue: TypeValues;
+  projectTypeDir: string;
+  name: string;
+};
 
 const checkRequiredArgs = (args: string[]) => {
   Object.entries(REQUIRED_ARGS).forEach(([key, value]) => {
@@ -44,9 +60,11 @@ const parseArgs = (args: string[]): Args => {
   const parsed: Args = { 
     scriptRunner: '',
     template: DEFAULT_INIT_TEMPLATE,
+    typeValue: 'a',
     projectTypeDir: '',
     name: '',
   };
+
   for (let i = 0; i < args.length; i++) {
     const value = args[i + 1]
     switch (args[i]) {
@@ -63,6 +81,7 @@ const parseArgs = (args: string[]): Args => {
         if (value === undefined || !TYPE_VALUES.includes(value as TypeValues)) {
           throw new Error(`-t(--type) must be a value from the list: ${TYPE_VALUES.join(', ')}`);
         }
+        parsed.typeValue = value as TypeValues
         parsed.projectTypeDir = getBasePathDirname(value as TypeValues);
         break;
       case "-n":
@@ -78,16 +97,36 @@ const parseArgs = (args: string[]): Args => {
   return parsed;
 }
 
+const changePackageJson = async (type: TypeValues, path: string) => {
+  const file = Bun.file(`${path}/package.json`)
+  const parsedPackageJson = await file.json() as PackageJson
+  parsedPackageJson.devDependencies = {
+    ...parsedPackageJson.devDependencies,
+    ...settingsDevDeps,
+  }
+
+  if (type === 'p' || type === 'package') {
+    parsedPackageJson.name = `@repo/${parsedPackageJson.name}`
+    parsedPackageJson.exports = {}
+  }
+
+  await Bun.write(file, JSON.stringify(parsedPackageJson, null, 2))
+}
+
 async function main(): Promise<void> {
   checkRequiredArgs(Bun.argv)
-  const { scriptRunner, template, projectTypeDir, name } = parseArgs(Bun.argv);
+  const { scriptRunner, template, typeValue, projectTypeDir, name } = parseArgs(Bun.argv);
   const path = `./${projectTypeDir}/${name}`;
 
   // Execute the init script in the target directory
   await Bun.spawn(['mkdir', path])
   const initScript = ['bun', scriptRunner, ...template]
   console.log(...initScript, path)
-  await Bun.spawn(initScript, { cwd: path })
+  Bun.spawnSync(initScript, { cwd: path })
+
+  await Promise.all([
+    changePackageJson(typeValue, path),
+  ])
 
   // Install dependencies
   await Bun.spawn(["bun", "install"], { cwd: path });
