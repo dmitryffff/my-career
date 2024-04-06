@@ -33,5 +33,6 @@ module.exports = {
   overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
   rules: {
      "prettier/prettier": ["warn", prettierConfig],
+     "jest/no-deprecated-functions": 'off'
   }
 };
