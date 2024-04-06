@@ -1,7 +1,8 @@
 #!/usr/bin/env bun
 type Args = {
+  scriptRunner: string;
   template: string[];
-  projectTypePath: string;
+  projectTypeDir: string;
   name: string;
 };
 
@@ -10,9 +11,10 @@ const REQUIRED_ARGS = {
   type: ['-t', '--type'], 
   name: ['-n', '--name'],
 } as const
+// [[type, ['-t', '--type']], [name, ['-n', '--name']]].forEach(([key, value]) => )
 const TYPE_VALUES = ['app', 'package', 'a', 'p'] as const
 type TypeValues = typeof TYPE_VALUES[number]
-const DEFAULT_INIT_SCRIPT = ["init", "-y"]
+const DEFAULT_INIT_TEMPLATE = ["init", "-y"]
 
 const checkRequiredArgs = (args: string[]) => {
   Object.entries(REQUIRED_ARGS).forEach(([key, value]) => {
@@ -39,28 +41,34 @@ const getBasePathDirname = (value: TypeValues): string => {
 }
 
 const parseArgs = (args: string[]): Args => {
-  const parsed: Args = { template: DEFAULT_INIT_SCRIPT, projectTypePath: '', name: '' };
+  const parsed: Args = { 
+    scriptRunner: '',
+    template: DEFAULT_INIT_TEMPLATE,
+    projectTypeDir: '',
+    name: '',
+  };
   for (let i = 0; i < args.length; i++) {
     const value = args[i + 1]
     switch (args[i]) {
       case "-i":
       case "--initScript":
         if (value === undefined) {
-          break
+          break;
         }
-        parsed.template = [BUN_CREATE_SCRIPT, ...value.split(' ')];
+        parsed.scriptRunner = BUN_CREATE_SCRIPT;
+        parsed.template = value.split(' ');
         break;
       case "-t":
       case "--type":
         if (value === undefined || !TYPE_VALUES.includes(value as TypeValues)) {
-          throw new Error(`-t(--type) must be a value from the list: ${TYPE_VALUES.join(', ')}`)
+          throw new Error(`-t(--type) must be a value from the list: ${TYPE_VALUES.join(', ')}`);
         }
-        parsed.projectTypePath = getBasePathDirname(value as TypeValues);
+        parsed.projectTypeDir = getBasePathDirname(value as TypeValues);
         break;
       case "-n":
       case "--name":
         if (value === undefined) {
-          throw new Error(`-n(--name) must be defined`)
+          throw new Error(`-n(--name) must be defined`);
         }
         parsed.name = value;
         break;
@@ -72,13 +80,14 @@ const parseArgs = (args: string[]): Args => {
 
 async function main(): Promise<void> {
   checkRequiredArgs(Bun.argv)
-  const { template, projectTypePath, name } = parseArgs(Bun.argv);
-  const path = `./${projectTypePath}/${name}`;
+  const { scriptRunner, template, projectTypeDir, name } = parseArgs(Bun.argv);
+  const path = `./${projectTypeDir}/${name}`;
 
   // Execute the init script in the target directory
   await Bun.spawn(['mkdir', path])
-  console.log('bun', ...template)
-  await Bun.spawn(['bun', ...template], { cwd: path })
+  const initScript = ['bun', scriptRunner, ...template]
+  console.log(...initScript, path)
+  await Bun.spawn(initScript, { cwd: path })
 
   // Install dependencies
   await Bun.spawn(["bun", "install"], { cwd: path });
