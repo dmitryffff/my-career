@@ -21,9 +21,9 @@ const REQUIRED_ARGS = {
   type: ['-t', '--type'], 
   name: ['-n', '--name'],
   typescriptConfig: ['-tc', '--typescriptConfig'],
+  eslintConfig: ['-ec', '--eslintConfig'],
 
 } as const
-// [[type, ['-t', '--type']], [name, ['-n', '--name']]].forEach(([key, value]) => )
 const TYPE_VALUES = ['app', 'package', 'a', 'p'] as const
 type TypeValues = typeof TYPE_VALUES[number]
 const DEFAULT_INIT_TEMPLATE = ["init", "-y"]
@@ -35,6 +35,7 @@ type Args = {
   projectTypeDir: string;
   name: string;
   typescriptConfig: string;
+  eslintConfig: string;
 };
 
 const getRepoProject = (projectName: string) => `@repo/${projectName}`
@@ -75,6 +76,7 @@ const parseArgs = (args: string[]): Args => {
     projectTypeDir: '',
     name: '',
     typescriptConfig: '',
+    eslintConfig: '',
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -110,6 +112,13 @@ const parseArgs = (args: string[]): Args => {
         }
         parsed.typescriptConfig = value;
         break
+      case '-ec':
+      case '--eslintConfig':
+        if (value === undefined) {
+          throw new Error(`-ec(--eslintConfig) must be defined`);
+        }
+        parsed.eslintConfig = value;
+        break
     }
     i++; // skip next
   }
@@ -140,8 +149,22 @@ const changeTsConfig = async (path: string, typescriptConfig: string) => {
   await Bun.write(file, stringifyJsonWithComments)
 }
 
-const addEslintConfig = () => {
+const addEslintConfig = async (path: string, eslintConfig: string) => {
+  await Bun.write(
+    `${path}/.eslintrc.js`,
+    `/** @type {import("eslint").Linter.Config} */
+module.exports = {
+  root: true,
+  extends: ["@repo/eslint-config/${eslintConfig}.js"],
+  parser: "@typescript-eslint/parser",
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: true,
+  },
+};
 
+`
+  )
 }
 
 async function main(): Promise<void> {
@@ -153,11 +176,12 @@ async function main(): Promise<void> {
     typescriptConfig,
     projectTypeDir,
     name,
+    eslintConfig,
   } = parseArgs(Bun.argv);
   const path = `./${projectTypeDir}/${name}`;
 
   // Execute the init script in the target directory
-  await Bun.spawn(['mkdir', path])
+  Bun.spawnSync(['mkdir', path])
   const initScript = ['bun', scriptRunner, ...template]
   console.log(...initScript, path)
   Bun.spawnSync(initScript, { cwd: path })
@@ -165,6 +189,7 @@ async function main(): Promise<void> {
   await Promise.all([
     changePackageJson(path, typeValue),
     changeTsConfig(path, typescriptConfig),
+    addEslintConfig(path, eslintConfig),
   ])
 
   // Install dependencies
