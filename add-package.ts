@@ -88,7 +88,7 @@ const parseArgs = (args: string[]): Args => {
           break;
         }
         parsed.scriptRunner = BUN_CREATE_SCRIPT;
-        parsed.template = value.split(' ');
+        parsed.template = [ ...value.split(' '), '--no-install', '--no-git'];
         break;
       case "-t":
       case "--type":
@@ -181,10 +181,15 @@ async function main(): Promise<void> {
   const path = `./${projectTypeDir}/${name}`;
 
   // Execute the init script in the target directory
-  Bun.spawnSync(['mkdir', path])
-  const initScript = ['bun', scriptRunner, ...template]
-  console.log(...initScript, path)
-  Bun.spawnSync(initScript, { cwd: path })
+  const script = ['bun', scriptRunner, ...template, path].filter(a => a !== '')
+  console.log(script)
+  if (scriptRunner !== '') {
+    Bun.spawnSync(script)
+  } else {
+    script.pop()
+    Bun.spawnSync(['mkdir', path])
+    Bun.spawnSync(script, { cwd: path })
+  }
 
   await Promise.all([
     changePackageJson(path, typeValue),
