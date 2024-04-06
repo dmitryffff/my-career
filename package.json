@@ -1,11 +1,11 @@
 {
   "name": "my-career",
-  "private": true,
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "add-package": "bun ./add-package.ts"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
@@ -17,12 +17,9 @@
     "node": ">=18"
   },
   "packageManager": "bun@1.0.29",
+  "private": true,
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "dependencies": {
-    "jest": "^29.7.0",
-    "zod": "^3.22.4"
-  }
+  ]
 }
