@@ -31,6 +31,9 @@ module.exports = {
     "node_modules/",
   ],
   overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
+  globals: {
+    Bun: "readonly",
+  },
   rules: {
      "prettier/prettier": ["warn", prettierConfig],
      "jest/no-deprecated-functions": 'off'
