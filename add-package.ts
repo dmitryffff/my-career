@@ -7,6 +7,7 @@ type PackageJson = {
   name: string,
   devDependencies: StringMap,
   exports?: StringMap,
+  type?: string,
   [key: string]: unknown
 }
 const settingsDevDeps = {
@@ -36,6 +37,7 @@ type Args = {
   name: string;
   typescriptConfig: string;
   eslintConfig: string;
+  eslintGlobals: StringMap;
 };
 
 const getRepoProject = (projectName: string) => `@repo/${projectName}`
@@ -77,6 +79,7 @@ const parseArgs = (args: string[]): Args => {
     name: '',
     typescriptConfig: '',
     eslintConfig: '',
+    eslintGlobals: {},
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -119,6 +122,10 @@ const parseArgs = (args: string[]): Args => {
         }
         parsed.eslintConfig = value;
         break
+      case '-bg':
+      case '--bunGlobal':
+        parsed.eslintGlobals = { ...parsed.eslintGlobals, Bun: 'readonly' };
+        break
     }
     i++; // skip next
   }
@@ -128,6 +135,7 @@ const parseArgs = (args: string[]): Args => {
 const changePackageJson = async (path: string, type: TypeValues) => {
   const file = Bun.file(`${path}/package.json`)
   const parsedPackageJson = await file.json() as PackageJson
+  delete parsedPackageJson.type
   parsedPackageJson.devDependencies = {
     ...parsedPackageJson.devDependencies,
     ...settingsDevDeps,
@@ -143,19 +151,22 @@ const changePackageJson = async (path: string, type: TypeValues) => {
 
 const changeTsConfig = async (path: string, typescriptConfig: string) => {
   const file = Bun.file(`${path}/tsconfig.json`)
-  let stringifyJsonWithComments = await file.text()
-  const extendsProp = `  "extends": "${getRepoProject('typescript-config')}/${typescriptConfig}.json",\n`
-  stringifyJsonWithComments = stringifyJsonWithComments.slice(0, 2) + extendsProp + stringifyJsonWithComments.slice(2)
-  await Bun.write(file, stringifyJsonWithComments)
+  const stringifyJsonWithComments = await file.text()
+  const tsconfig = JSON.parse(removeCommentsFromJson(stringifyJsonWithComments))
+  tsconfig.extends = `${getRepoProject('typescript-config')}/${typescriptConfig}.json`
+  tsconfig.private = true
+  delete tsconfig.compilerOptions
+  await Bun.write(file, JSON.stringify(tsconfig, null, 2))
 }
 
-const addEslintConfig = async (path: string, eslintConfig: string) => {
+const addEslintConfig = async (path: string, eslintConfig: string, eslintGlobals: StringMap) => {
   await Bun.write(
     `${path}/.eslintrc.js`,
     `/** @type {import("eslint").Linter.Config} */
 module.exports = {
   root: true,
   extends: ["@repo/eslint-config/${eslintConfig}.js"],
+  globals: ${JSON.stringify(eslintGlobals)},
   parser: "@typescript-eslint/parser",
   parserOptions: {
     tsconfigRootDir: __dirname,
@@ -177,6 +188,7 @@ async function main(): Promise<void> {
     projectTypeDir,
     name,
     eslintConfig,
+    eslintGlobals,
   } = parseArgs(Bun.argv);
   const path = `./${projectTypeDir}/${name}`;
 
@@ -194,7 +206,7 @@ async function main(): Promise<void> {
   await Promise.all([
     changePackageJson(path, typeValue),
     changeTsConfig(path, typescriptConfig),
-    addEslintConfig(path, eslintConfig),
+    addEslintConfig(path, eslintConfig, eslintGlobals),
   ])
 
   // Install dependencies
