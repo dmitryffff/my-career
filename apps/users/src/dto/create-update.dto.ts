@@ -1,7 +1,9 @@
-import z from 'zod'
+import type { Static } from 'elysia'
+import { t } from 'elysia'
+import { phoneValidator } from '@repo/utils/validators'
 
-export const createUserDtoScheme = z
-  .object({ phoneNumber: z.string().regex(/^\d{10}$/gm) })
-  .strict()
+export const createUserDtoScheme = t.Object({
+  phoneNumber: phoneValidator,
+})
 
-export type CreateUserDto = z.infer<typeof createUserDtoScheme>
+export type CreateUserDto = Static<typeof createUserDtoScheme>
