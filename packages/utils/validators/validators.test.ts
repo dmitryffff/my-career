@@ -9,7 +9,7 @@ describe('Validators tests', () => {
       expect(Value.Check(phoneValidator, '+11234567890')).toBeTrue()
       expect(Value.Check(phoneValidator, '+15551234567890')).toBeTrue()
       expect(Value.Check(phoneValidator, '+331234567890')).toBeTrue()
-      expect(Value.Check(phoneValidator, '+6212345678901234')).toBeTrue()
+      expect(Value.Check(phoneValidator, '+621234567890123')).toBeTrue()
     })
 
     describe('Should not validate', () => {
@@ -28,8 +28,7 @@ describe('Validators tests', () => {
         ).not.toBeTrue()
       })
 
-        expect(Value.Check(phoneValidator, '+12 34567890')).not.toBeTrue()
-      })
+      expect(Value.Check(phoneValidator, '+12 34567890')).not.toBeTrue()
     })
   })
 })
