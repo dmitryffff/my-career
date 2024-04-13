@@ -1,7 +1,6 @@
-import type { Prisma, User } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import {
-  BaseService,
+  ServiceError,
   db,
   env,
   logger,
@@ -9,6 +8,9 @@ import {
 } from '@repo/backend-plugins/plugins'
 import { Elysia } from 'elysia'
 import z from 'zod'
+import { ERROR_MESSAGES } from '@repo/utils/constants'
+import { UserService } from './services/user-service'
+import { createUserDtoScheme } from './dto/create-update.dto'
 
 const envSchema = z.object({
   PORT: z.coerce.number(),
@@ -25,16 +27,38 @@ const prismaClient = new PrismaClient()
 const userService = new UserService(prismaClient)
 
 const app = new Elysia()
-  .use(env(envSchema))
-  .use(db(prismaClient))
-  .decorate('userService', userService)
+  .error({
+    SERVICE_ERROR: ServiceError,
+  })
   .derive(({ path }) => ({
     log: logger(path),
   }))
-  .get('/', async (ctx) => {
-    await ctx.userService.create()
-    return `Hello!`
+  .onError(({ path, code, error, set }) => {
+    logger(path).error(error)
+    if (code === 'SERVICE_ERROR') {
+      set.status = error.status
+    }
+
+    if (code === 'INTERNAL_SERVER_ERROR') {
+      set.status = error.status
+      return new Response(ERROR_MESSAGES.SERVER_ERROR)
+    }
+
+    return new Response(error.message)
   })
+  .use(env(envSchema))
+  .use(db(prismaClient))
+  .decorate('userService', userService)
+  .post(
+    '/',
+    async (ctx) => {
+      await ctx.userService.createUser(ctx.body)
+      return `Hello!`
+    },
+    {
+      body: createUserDtoScheme,
+    },
+  )
   .listen(Bun.env.PORT, (s) => {
     pinoLogger.info(`🦊 Elysia is running at ${s.hostname}:${s.port}`)
   })
