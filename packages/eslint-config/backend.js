@@ -36,6 +36,6 @@ module.exports = {
   },
   rules: {
      "prettier/prettier": ["warn", prettierConfig],
-     "jest/no-deprecated-functions": 'off'
+     "jest/no-deprecated-functions": 'off',
   }
 };
