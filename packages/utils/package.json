@@ -12,7 +12,9 @@
     "typescript": "^5.0.0"
   },
   "exports": {
-    "./validators": "./validators/index.ts"
+    "./validators": "./validators/index.ts",
+    "./constants": "./constants/index.ts",
+    "./helpers": "./helpers/index.ts"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.32.20",
