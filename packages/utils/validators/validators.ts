@@ -1,4 +1,4 @@
 import { RegExp } from '@sinclair/typebox'
-import { RU_PHONE } from './regex'
+import { PHONE_REGEX } from './regex'
 
-export const ruPhoneValidator = RegExp(RU_PHONE)
+export const phoneValidator = RegExp(PHONE_REGEX)

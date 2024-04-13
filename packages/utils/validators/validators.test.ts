@@ -1,21 +1,35 @@
 import { describe, it, expect } from 'bun:test'
 import { Value } from '@sinclair/typebox/value'
-import { ruPhoneValidator } from './validators'
+import { phoneValidator } from './validators'
 
 describe('Validators tests', () => {
   describe('Phone number validator', () => {
-    it('Must not throw with a valid phone number', () => {
-      const validPhoneNumber = '9211809476'
-      expect(Value.Check(ruPhoneValidator, validPhoneNumber)).toBeTrue()
+    it('Should validate', () => {
+      expect(Value.Check(phoneValidator, '+1234567890')).toBeTrue()
+      expect(Value.Check(phoneValidator, '+11234567890')).toBeTrue()
+      expect(Value.Check(phoneValidator, '+15551234567890')).toBeTrue()
+      expect(Value.Check(phoneValidator, '+331234567890')).toBeTrue()
+      expect(Value.Check(phoneValidator, '+6212345678901234')).toBeTrue()
     })
 
-    it('Must throw with an invalid phone number', () => {
-      let invalidPhoneNumber = '921'
-      expect(Value.Check(ruPhoneValidator, invalidPhoneNumber)).toBeFalse()
-      invalidPhoneNumber = '92118094769211809476'
-      expect(Value.Check(ruPhoneValidator, invalidPhoneNumber)).toBeFalse()
-      invalidPhoneNumber = '921180947a'
-      expect(Value.Check(ruPhoneValidator, invalidPhoneNumber)).toBeFalse()
+    describe('Should not validate', () => {
+      it('Missing "+"', () => {
+        expect(Value.Check(phoneValidator, '1234567890')).not.toBeTrue()
+      })
+
+      it('Incorrect country code format', () => {
+        expect(Value.Check(phoneValidator, '001234567890')).not.toBeTrue()
+      })
+
+      it('Too short/long', () => {
+        expect(Value.Check(phoneValidator, '+1234')).not.toBeTrue()
+        expect(
+          Value.Check(phoneValidator, '+12345678901234567890'),
+        ).not.toBeTrue()
+      })
+
+        expect(Value.Check(phoneValidator, '+12 34567890')).not.toBeTrue()
+      })
     })
   })
 })
