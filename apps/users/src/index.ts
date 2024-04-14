@@ -10,7 +10,7 @@ import { Elysia } from 'elysia'
 import z from 'zod'
 import { ERROR_MESSAGES } from '@repo/utils/constants'
 import { UserService } from './services/user-service'
-import { createUserDtoScheme } from './dto/create-update.dto'
+import { createUpdateUserDtoScheme } from './dto/create-user.dto'
 
 const envSchema = z.object({
   PORT: z.coerce.number(),
@@ -56,7 +56,7 @@ const app = new Elysia()
       return `Hello!`
     },
     {
-      body: createUserDtoScheme,
+      body: createUpdateUserDtoScheme,
     },
   )
   .listen(Bun.env.PORT, (s) => {

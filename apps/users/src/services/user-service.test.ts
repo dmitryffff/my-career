@@ -4,7 +4,7 @@ import { describe, expect, it } from 'bun:test'
 import { ERROR_MESSAGES } from '@repo/utils/constants'
 import { ServiceError } from '@repo/backend-plugins/plugins'
 import { error } from 'elysia'
-import type { CreateUserDto } from '../dto/create-update.dto'
+import type { CreateUserDto } from '../dto/create-user.dto'
 import { UserService } from './user-service'
 
 const client = new PrismaClient()
@@ -46,4 +46,6 @@ describe('User`s service tests', () => {
       )
     })
   })
+
+  describe('Update a user', () => {})
 })
