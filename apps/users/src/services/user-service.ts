@@ -3,6 +3,7 @@ import { BaseService } from '@repo/backend-plugins/plugins'
 import { error } from 'elysia'
 import { ERROR_MESSAGES } from '@repo/utils/constants'
 import type { CreateUserDto } from '../dto/create-user.dto'
+import type { UpdateUserDto } from '../dto/update-user.dto'
 
 export class UserService extends BaseService<Prisma.UserDelegate> {
   entityName = 'пользователь'
@@ -28,5 +29,12 @@ export class UserService extends BaseService<Prisma.UserDelegate> {
     return this.repository.create({
       data: { phoneNumber: dto.phoneNumber },
     })
+  }
+
+  public readonly updateUser = async (
+    userId: string,
+    dto: UpdateUserDto,
+  ): Promise<User> => {
+    throw new Error('Not implemented')
   }
 }
