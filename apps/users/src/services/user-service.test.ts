@@ -113,37 +113,47 @@ describe('User`s service tests', () => {
       })
     })
 
-    it('User must exists', async () => {
-      expect(await userService.updateUser('nonExistsUserId', {})).toThrow(
-        new ServiceError(
-          userService.serviceName,
-          methodName,
-          'Bad Request',
-          ERROR_MESSAGES.DOES_NOT_EXISTS(userService.entityName, methodName),
-        ),
-      )
-    })
-
-    it('Cant update a user with nullable phoneNumber', async () => {
-      expect(
-        // @ts-expect-error -- only for invalid test
-        await userService.updateUser(user?.id!, { phoneNumber: null }),
+    it('User must exists', () => {
+      expect(async () =>
+        userService.updateUser('ab9f1830-64a4-4cf6-89af-b21d395f06b1', {
+          firstName: null,
+        }),
       ).toThrow(
         new ServiceError(
           userService.serviceName,
           methodName,
           'Bad Request',
-          ERROR_MESSAGES.CANT_CRUD(
-            'update',
+          ERROR_MESSAGES.DOES_NOT_EXISTS(
             userService.entityName,
-            'номер телефона',
-            'пустой номер телефона',
+            'идентификатор',
           ),
         ),
       )
     })
 
-    it('updatedAt must changed', async () => {
+    it('Cant duplicate phoneNumber', async () => {
+      const existedPhoneNumber = 'existedPhoneNumber10'
+      const existedUser = await client.user.create({
+        data: {
+          phoneNumber: existedPhoneNumber,
+        },
+      })
+      expect(async () =>
+        userService.updateUser(user?.id!, {
+          phoneNumber: existedPhoneNumber,
+        }),
+      ).toThrow(
+        new ServiceError(
+          userService.serviceName,
+          methodName,
+          'Bad Request',
+          ERROR_MESSAGES.EXISTS(userService.entityName, 'номер телефона'),
+        ),
+      )
+      await client.user.delete({ where: { id: existedUser.id } })
+    })
+
+    it('updatedAt must changes', async () => {
       expect(
         (
           await userService.updateUser(user?.id!, {

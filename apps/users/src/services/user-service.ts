@@ -32,6 +32,28 @@ export class UserService extends BaseService<Prisma.UserDelegate> {
     userId: string,
     dto: UpdateUserDto,
   ): Promise<User> => {
-    throw new Error('Not implemented')
+    const user = await this.repository.findUnique({ where: { id: userId } })
+    if (user === null) {
+      this.throwError(
+        'updateUser',
+        'Bad Request',
+        ERROR_MESSAGES.DOES_NOT_EXISTS(this.entityName, 'идентификатор'),
+      )
+    }
+
+    if (dto.phoneNumber !== undefined) {
+      const existedUser = await this.repository.findUnique({
+        where: { phoneNumber: dto.phoneNumber },
+      })
+      if (existedUser !== null && existedUser.id !== userId) {
+        this.throwError(
+          'updateUser',
+          'Bad Request',
+          ERROR_MESSAGES.EXISTS(this.entityName, 'номер телефона'),
+        )
+      }
+    }
+
+    return this.repository.update({ where: { id: userId }, data: dto })
   }
 }
