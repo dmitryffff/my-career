@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import type pino from 'pino'
+import type * as pino from 'pino'
 import type { error } from 'elysia'
 import { logger } from '../logger'
 import { ServiceError } from './service-error'
@@ -13,15 +13,20 @@ export class BaseService<T> {
   protected readonly log: pino.Logger
   protected readonly throwError: (
     method: string,
-    err: ReturnType<typeof error>,
+    status: Parameters<typeof error>[0],
+    msg: string,
   ) => never
 
   constructor(name: keyof PrismaClient, client: PrismaClient) {
     this.serviceName = `${name as string}Service`
     this.repository = client[name] as T
     this.log = logger(this.serviceName)
-    this.throwError = (method: string, err: ReturnType<typeof error>) => {
-      throw new ServiceError(this.serviceName, method, err)
+    this.throwError = (
+      method: string,
+      status: Parameters<typeof error>[0],
+      msg: string,
+    ) => {
+      throw new ServiceError(this.serviceName, method, status, msg)
     }
   }
 }

@@ -5,7 +5,6 @@ import { PrismaClient } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { ERROR_MESSAGES } from '@repo/utils/constants'
 import { ServiceError } from '@repo/backend-plugins/plugins'
-import { error } from 'elysia'
 import type { CreateUserDto } from '../dto/create-user.dto'
 import type { UpdateUserDto } from '../dto/update-user.dto'
 import { UserService } from './user-service'
@@ -43,10 +42,8 @@ describe('User`s service tests', () => {
         new ServiceError(
           userService.serviceName,
           methodName,
-          error(
-            'Bad Request',
-            ERROR_MESSAGES.EXISTS(userService.entityName, 'номер телефона'),
-          ),
+          'Bad Request',
+          ERROR_MESSAGES.EXISTS(userService.entityName, 'номер телефона'),
         ),
       )
     })
@@ -121,10 +118,8 @@ describe('User`s service tests', () => {
         new ServiceError(
           userService.serviceName,
           methodName,
-          error(
-            'Bad Request',
-            ERROR_MESSAGES.DOES_NOT_EXISTS(userService.entityName, methodName),
-          ),
+          'Bad Request',
+          ERROR_MESSAGES.DOES_NOT_EXISTS(userService.entityName, methodName),
         ),
       )
     })
@@ -137,14 +132,12 @@ describe('User`s service tests', () => {
         new ServiceError(
           userService.serviceName,
           methodName,
-          error(
-            'Bad Request',
-            ERROR_MESSAGES.CANT_CRUD(
-              'update',
-              userService.entityName,
-              'номер телефона',
-              'пустой номер телефона',
-            ),
+          'Bad Request',
+          ERROR_MESSAGES.CANT_CRUD(
+            'update',
+            userService.entityName,
+            'номер телефона',
+            'пустой номер телефона',
           ),
         ),
       )

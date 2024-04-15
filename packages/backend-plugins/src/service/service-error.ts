@@ -1,4 +1,3 @@
-import { ELYSIA_RESPONSE } from 'elysia'
 import type { error } from 'elysia'
 
 const SPLITTER = '|'
@@ -12,27 +11,14 @@ interface ParsedError {
 
 export class ServiceError extends Error {
   public readonly _splitter = SPLITTER
-  public status: number
-  public msg: string
 
   constructor(
-    public serviceName: string,
-    public methodName: string,
-    err: ReturnType<typeof error>,
+    public readonly serviceName: string,
+    public readonly methodName: string,
+    public readonly status: Parameters<typeof error>[0],
+    public readonly msg: string,
   ) {
-    super(ServiceError.getErrorMessage(serviceName, methodName, err))
-    this.status = err[ELYSIA_RESPONSE]
-    this.msg = err.response as string
-  }
-
-  static getErrorMessage(
-    serviceName: string,
-    methodName: string,
-    err: ReturnType<typeof error>,
-  ): string {
-    return [serviceName, methodName, err[ELYSIA_RESPONSE], err.response].join(
-      SPLITTER,
-    )
+    super([serviceName, methodName, status, msg].join(SPLITTER))
   }
 
   static parseError(err: string): ParsedError {
