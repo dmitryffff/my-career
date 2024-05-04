@@ -182,11 +182,46 @@ describe('User`s service tests', () => {
       })
       expect(deletedUser).not.toBeNull()
       expect(deletedUser?.deletedAt).not.toBeNull()
+      await client.user.delete({ where: { id: user.id } })
     })
 
     it('Deleting a non existent user', () => {
       expect(async () =>
         userService.deleteUser('ab9f1830-64a4-4cf6-89af-b21d395f06b1'),
+      ).toThrow(
+        new ServiceError(
+          userService.serviceName,
+          methodName,
+          'Bad Request',
+          ERROR_MESSAGES.DOES_NOT_EXISTS(
+            userService.entityName,
+            'идентификатор',
+          ),
+        ),
+      )
+    })
+  })
+
+  describe(userService.findUserById.name, () => {
+    const methodName = userService.findUserById.name
+
+    it('Find an existent user', async () => {
+      const user = await client.user.create({
+        data: {
+          phoneNumber: 'phoneNumber',
+          email: 'testEmail',
+          firstName: 'firstName',
+          secondName: 'secondName',
+        },
+      })
+      const foundUser = await userService.findUserById(user.id)
+      expect(foundUser).toMatchObject(user)
+      await client.user.delete({ where: { id: user.id } })
+    })
+
+    it('Find an non existent user', () => {
+      expect(async () =>
+        userService.findUserById('ab9f1830-64a4-4cf6-89af-b21d395f06b1'),
       ).toThrow(
         new ServiceError(
           userService.serviceName,

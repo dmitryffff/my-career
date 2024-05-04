@@ -72,4 +72,16 @@ export class UserService extends BaseService<Prisma.UserDelegate> {
     })
     return userId
   }
+
+  public readonly findUserById = async (userId: string): Promise<User> => {
+    const user = await this.repository.findUnique({ where: { id: userId } })
+    if (user === null) {
+      this.throwError(
+        this.findUserById.name,
+        'Bad Request',
+        ERROR_MESSAGES.DOES_NOT_EXISTS(this.entityName, 'идентификатор'),
+      )
+    }
+    return user
+  }
 }
