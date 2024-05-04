@@ -163,4 +163,41 @@ describe('User`s service tests', () => {
       ).not.toBe(user?.updatedAt.getTime())
     })
   })
+
+  describe(userService.deleteUser.name, () => {
+    const methodName = userService.deleteUser.name
+
+    it('Soft deleting an existent user', async () => {
+      const user = await client.user.create({
+        data: {
+          phoneNumber: 'phoneNumber',
+          email: 'testEmail',
+          firstName: 'firstName',
+          secondName: 'secondName',
+        },
+      })
+      await userService.deleteUser(user.id)
+      const deletedUser = await client.user.findUnique({
+        where: { id: user.id },
+      })
+      expect(deletedUser).not.toBeNull()
+      expect(deletedUser?.deletedAt).not.toBeNull()
+    })
+
+    it('Deleting a non existent user', () => {
+      expect(async () =>
+        userService.deleteUser('ab9f1830-64a4-4cf6-89af-b21d395f06b1'),
+      ).toThrow(
+        new ServiceError(
+          userService.serviceName,
+          methodName,
+          'Bad Request',
+          ERROR_MESSAGES.DOES_NOT_EXISTS(
+            userService.entityName,
+            'идентификатор',
+          ),
+        ),
+      )
+    })
+  })
 })

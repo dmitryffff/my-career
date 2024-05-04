@@ -19,7 +19,7 @@ import {
 
 describe('Validators tests', () => {
   describe('Phone number validator', () => {
-    it('Should validate', () => {
+    it('Valid', () => {
       expect(Value.Check(phoneValidator, '+1234567890')).toBeTrue()
       expect(Value.Check(phoneValidator, '+11234567890')).toBeTrue()
       expect(Value.Check(phoneValidator, '+15551234567890')).toBeTrue()
@@ -27,7 +27,7 @@ describe('Validators tests', () => {
       expect(Value.Check(phoneValidator, '+621234567890123')).toBeTrue()
     })
 
-    describe('Should not validate', () => {
+    describe('Invalid', () => {
       it('Missing "+"', () => {
         expect(Value.Check(phoneValidator, '1234567890')).not.toBeTrue()
       })

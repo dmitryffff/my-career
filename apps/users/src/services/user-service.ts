@@ -35,7 +35,7 @@ export class UserService extends BaseService<Prisma.UserDelegate> {
     const user = await this.repository.findUnique({ where: { id: userId } })
     if (user === null) {
       this.throwError(
-        'updateUser',
+        this.updateUser.name,
         'Bad Request',
         ERROR_MESSAGES.DOES_NOT_EXISTS(this.entityName, 'идентификатор'),
       )
@@ -47,7 +47,7 @@ export class UserService extends BaseService<Prisma.UserDelegate> {
       })
       if (existedUser !== null && existedUser.id !== userId) {
         this.throwError(
-          'updateUser',
+          this.updateUser.name,
           'Bad Request',
           ERROR_MESSAGES.EXISTS(this.entityName, 'номер телефона'),
         )
@@ -55,5 +55,21 @@ export class UserService extends BaseService<Prisma.UserDelegate> {
     }
 
     return this.repository.update({ where: { id: userId }, data: dto })
+  }
+
+  public readonly deleteUser = async (userId: string): Promise<string> => {
+    const user = await this.repository.findUnique({ where: { id: userId } })
+    if (user === null) {
+      this.throwError(
+        this.deleteUser.name,
+        'Bad Request',
+        ERROR_MESSAGES.DOES_NOT_EXISTS(this.entityName, 'идентификатор'),
+      )
+    }
+    await this.repository.update({
+      where: { id: userId },
+      data: { deletedAt: new Date() },
+    })
+    return userId
   }
 }
