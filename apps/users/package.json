@@ -6,7 +6,7 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "latest",
     "elysia": "latest",
     "zod": "^3.22.4",
     "@sinclair/typebox": "^0.32.20"
@@ -20,7 +20,7 @@
     "bun": "^1.1.3",
     "bun-types": "latest",
     "eslint": "^9.0.0",
-    "prisma": "^5.11.0"
+    "prisma": "latest"
   },
   "module": "src/index.js"
 }
